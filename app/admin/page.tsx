@@ -100,6 +100,8 @@ export default function AdminPage() {
   const [routeStartCity, setRouteStartCity] = useState("");
   const [routeEndCity, setRouteEndCity] = useState("");
   const [durationHours, setDurationHours] = useState("120");
+  const [deliveryRouteHours, setDeliveryRouteHours] = useState("120");
+  const [middleCities, setMiddleCities] = useState("");
   const [routePoints, setRoutePoints] = useState<any[]>([]);
 
   const [newUsername, setNewUsername] = useState("");
@@ -282,6 +284,7 @@ export default function AdminPage() {
     }
 
     const route = findRouteByCities(startCity, endCity);
+    const isUssuriysk = /уссурийск/i.test(startCity) || /乌苏里斯克/i.test(startCity);
 
     if (!route) {
       alert("Маршрут не найден, обратитесь к администратору");
@@ -320,19 +323,25 @@ export default function AdminPage() {
       .eq("id", car.id);
 
     const createdAt = new Date();
-    const etaAt = new Date(createdAt.getTime() + Number(route.duration_hours || 0) * 60 * 60 * 1000);
+    const routeHours = Number(deliveryRouteHours || route.duration_hours || 0);
+    const etaAt = new Date(createdAt.getTime() + routeHours * 60 * 60 * 1000);
+    let manualDelayMinutes = 0;
+    if (isUssuriysk) {
+      const days = Number(prompt("Уссурийск: введите длительность этапа в днях", "3") || "0");
+      manualDelayMinutes = Math.max(0, days * 24 * 60);
+    }
 
     const { data: delivery, error: deliveryError } = await supabase
       .from("deliveries")
       .insert({
         car_id: car.id,
         route_id: route.id,
-        status: "in_progress",
+        status: isUssuriysk ? "paused" : "in_progress",
         progress: 0,
         total_km: Number(route.distance_km || 0),
         passed_km: 0,
-        time_adjustment_minutes: 0,
-        route_started_at: createdAt.toISOString(),
+        time_adjustment_minutes: manualDelayMinutes,
+        route_started_at: isUssuriysk ? null : createdAt.toISOString(),
         eta_at: etaAt.toISOString(),
       })
       .select()
@@ -1064,13 +1073,19 @@ export default function AdminPage() {
 
       {showCreateRoute && (
         <Modal onClose={() => setShowCreateRoute(false)}>
-          <h2 style={modalTitle}>Добавить маршрут</h2>
+          <h2 style={modalTitle}>Создать доставку</h2>
 
           <label style={labelStyle}>Точка отправления</label>
           <input value={routeStartCity} onChange={(event) => setRouteStartCity(event.target.value)} list="city-options" placeholder="Выберите город: 中文 · pinyin" style={inputStyle} />
 
           <label style={labelStyle}>Точка прибытия</label>
           <input value={routeEndCity} onChange={(event) => setRouteEndCity(event.target.value)} list="city-options" placeholder="Выберите город: 中文 · pinyin" style={inputStyle} />
+          <label style={labelStyle}>Промежуточные города</label>
+          <input value={middleCities} onChange={(event) => setMiddleCities(event.target.value)} placeholder="Через запятую" style={inputStyle} />
+
+          <label style={labelStyle}>Время маршрута (часы)</label>
+          <input value={deliveryRouteHours} onChange={(event) => setDeliveryRouteHours(event.target.value)} type="number" style={inputStyle} />
+
 
           <label style={labelStyle}>Длительность (часы)</label>
           <input

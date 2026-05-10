@@ -59,7 +59,6 @@ export default function HomePage() {
       <section style={s.heroCard}>
         <div style={s.imageLayer} />
         <div style={s.topRow}>
-          <img src="/taotaoche-logo.svg" alt="淘淘车 taotaoche" style={s.logo} />
           <div style={s.langSwitch}>
             <button onClick={() => changeLang("ru")} style={lang === "ru" ? s.langActive : s.langButton}>RU</button>
             <button onClick={() => changeLang("zh")} style={lang === "zh" ? s.langActive : s.langButton}>中文</button>
@@ -85,7 +84,7 @@ const s: Record<string, CSSProperties> = {
   page: { minHeight: "100vh", padding: 0, background: "#f6fbff" },
   heroCard: { position: "relative", minHeight: "100vh", overflow: "hidden" },
   imageLayer: { position: "absolute", inset: 0, background: "linear-gradient(90deg,rgba(247,251,255,.96) 0%,rgba(247,251,255,.72) 35%,rgba(247,251,255,.08) 78%), url('/hero-taotaoche.png') center / cover no-repeat" },
-  topRow: { position: "relative", zIndex: 2, display: "flex", justifyContent: "space-between", alignItems: "center", padding: "34px min(5vw,64px)" },
+    topRow: { position: "relative", zIndex: 2, display: "flex", justifyContent: "flex-end", alignItems: "center", padding: "20px min(4vw,34px)" },
   logo: { width: 170, height: 70, objectFit: "contain" },
   langSwitch: { display: "inline-flex", padding: 4, borderRadius: 999, background: "rgba(255,255,255,.72)", border: "1px solid rgba(23,105,255,.18)", backdropFilter: "blur(14px)", boxShadow: "var(--soft-shadow)" },
   langButton: { border: 0, borderRadius: 999, padding: "9px 14px", background: "transparent", color: "#33516f", fontWeight: 900, cursor: "pointer" },

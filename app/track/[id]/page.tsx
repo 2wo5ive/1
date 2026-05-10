@@ -10,10 +10,9 @@ const supabase = createClient((process.env.NEXT_PUBLIC_SUPABASE_URL || "https://
 
 function statusLabel(lang: Lang, status: string) {
   if (status === "delivered") return dictionary[lang].statusDelivered;
-  if (status === "paused") return dictionary[lang].statusPaused;
   return dictionary[lang].statusInProgress;
 }
-function chipClass(status: string) { return status === "delivered" ? "status-chip green" : status === "paused" ? "status-chip yellow" : "status-chip"; }
+function chipClass(status: string) { return status === "delivered" ? "status-chip green" : "status-chip"; }
 function formatDate(value?: string | Date | null) { return value ? new Date(value).toLocaleString("ru-RU") : "—"; }
 function fixedEta(delivery: any, route: any) {
   const base = delivery?.created_at || delivery?.route_started_at;
@@ -53,19 +52,7 @@ export default function TrackPage() {
       supabase.from("route_photos").select("*").eq("delivery_id", id).order("taken_at", { ascending: false }),
     ]);
     const routeData = routeResult.data;
-    let nextDelivery = deliveryData;
-    if (deliveryData.status === "in_progress" && deliveryData.route_started_at && routeData?.duration_hours) {
-      const durationMinutes = Math.max(1, Number(routeData.duration_hours || 0) * 60 + Number(deliveryData.time_adjustment_minutes || 0));
-      const elapsedMinutes = Math.max(0, (Date.now() - new Date(deliveryData.route_started_at).getTime()) / 60000);
-      const autoProgress = Math.min(elapsedMinutes / durationMinutes, 1);
-      if (autoProgress > Number(deliveryData.progress || 0)) {
-        const totalKm = Number(deliveryData.total_km || routeData.distance_km || 0);
-        const updatePayload = { progress: autoProgress, passed_km: totalKm * autoProgress, status: autoProgress >= 1 ? "delivered" : "in_progress" };
-        await supabase.from("deliveries").update(updatePayload).eq("id", id);
-        nextDelivery = { ...deliveryData, ...updatePayload };
-      }
-    }
-    setDelivery(nextDelivery);
+    setDelivery(deliveryData);
     setCar(carResult.data);
     setRoute(routeData);
     setPhotos(photosResult.data || []);

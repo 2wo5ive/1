@@ -8,8 +8,6 @@ export type OsrmRoute = {
   geometry: { type: "LineString"; coordinates: [number, number][] };
   distanceKm: number;
 };
-
-
 export const CAR_BRANDS = [
   { zh: "宝马", en: "BMW" }, { zh: "奔驰", en: "Mercedes-Benz" }, { zh: "奥迪", en: "Audi" }, { zh: "丰田", en: "Toyota" }, { zh: "理想", en: "Li Auto" }, { zh: "极氪", en: "Zeekr" }, { zh: "比亚迪", en: "BYD" }, { zh: "蔚来", en: "NIO" }, { zh: "小鹏", en: "XPeng" }, { zh: "问界", en: "AITO" }
 ];

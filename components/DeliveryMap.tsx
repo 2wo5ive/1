@@ -44,6 +44,9 @@ function getPositionByProgress(points: Point[], progress: number): Point {
   const [lat2, lng2] = points[index + 1];
   return [lat1 + (lat2 - lat1) * part, lng1 + (lng2 - lng1) * part];
 }
+  function easeInOut(t: number) {
+  return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+}
 
 function getPassedRoute(points: Point[], progress: number): Point[] {
   if (points.length < 2) return points;
@@ -130,14 +133,15 @@ export default function DeliveryMap({ deliveryId }: { deliveryId: string }) {
   }, [photos]);
 
   const startPoint = cities[0] ? cityToPoint(cities[0]) : route[0] || [55.7558, 37.6173];
-  const carPosition = getPositionByProgress(route, progress);
-  const passedRoute = getPassedRoute(route, progress);
+    const easedProgress = easeInOut(progress);
+    const carPosition = getPositionByProgress(route, easedProgress);
+    const passedRoute = getPassedRoute(route, easedProgress);
 
   return (
     <div style={{ height: 500, width: "100%", overflow: "hidden", borderRadius: 24 }}>
       <MapContainer center={carPosition || startPoint} zoom={6} style={{ height: "100%", width: "100%" }}>
         <AutoCenter position={carPosition} />
-        <TileLayer attribution="" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
         {route.length > 0 && <Polyline positions={route} pathOptions={{ color: "#6b8fcf", weight: 5, opacity: 0.6 }} />}
         {passedRoute.length > 0 && <Polyline positions={passedRoute} pathOptions={{ color: "#1769ff", weight: 6, opacity: 0.95 }} />}
 
